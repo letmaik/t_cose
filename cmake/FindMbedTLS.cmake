@@ -88,7 +88,7 @@ if(MbedTLS_FOUND AND NOT TARGET MbedTLS::MbedX509)
     IMPORTED_LOCATION "${MbedTLS_X509_LIBRARY}"
     INTERFACE_INCLUDE_DIRECTORIES "${MbedTLS_INCLUDE_DIR}"
   )
-  target_link_libraries(MbedTLS::MbedX509 PRIVATE MbedTLS::MbedCrypto)
+  target_link_libraries(MbedTLS::MbedX509 INTERFACE MbedTLS::MbedCrypto)
 endif()
 
 if(MbedTLS_FOUND AND NOT TARGET MbedTLS::MbedTLS)
@@ -97,7 +97,7 @@ if(MbedTLS_FOUND AND NOT TARGET MbedTLS::MbedTLS)
     IMPORTED_LOCATION "${MbedTLS_LIBRARY}"
     INTERFACE_INCLUDE_DIRECTORIES "${MbedTLS_INCLUDE_DIR}"
   )
-  target_link_libraries(MbedTLS::MbedX509 PRIVATE MbedTLS::MbedCrypto MbedTLS::MbedX509)
+  target_link_libraries(MbedTLS::MbedX509 INTERFACE MbedTLS::MbedCrypto MbedTLS::MbedX509)
 endif()
 
 mark_as_advanced(

@@ -66,10 +66,10 @@ if (BUILD_EXAMPLES)
 
 	if (MBEDTLS)
 		add_executable(t_cose_basic_example_psa examples/t_cose_basic_example_psa.c)
-		target_link_libraries(t_cose_basic_example_psa t_cose MbedTLS::MbedCrypto)
+		target_link_libraries(t_cose_basic_example_psa PRIVATE t_cose MbedTLS::MbedCrypto)
 	else()
 		add_executable(t_cose_basic_example_ossl examples/t_cose_basic_example_ossl.c)
-		target_link_libraries(t_cose_basic_example_ossl t_cose OpenSSL::Crypto)
+		target_link_libraries(t_cose_basic_example_ossl PRIVATE t_cose OpenSSL::Crypto)
 	endif()
 
 endif()
@@ -78,8 +78,26 @@ if (BUILD_TESTS)
 
 	enable_testing()
 
-	# TODO
+	set(T_COSE_TEST_SRC_COMMON
+		main.c
+		test/run_tests.c
+		test/t_cose_make_test_messages.c
+		test/t_cose_sign_verify_test.c
+		test/t_cose_test.c
+	)
 
-	#add_test()
+	add_executable(t_cose_test ${T_COSE_TEST_SRC_COMMON})
+	target_include_directories(t_cose_test PRIVATE src test)
+	target_link_libraries(t_cose_test PRIVATE t_cose)
+
+	if (MBEDTLS)
+		target_sources(t_cose_test PRIVATE test/t_cose_make_psa_test_key.c)
+		target_link_libraries(t_cose_test PRIVATE MbedTLS::MbedCrypto)
+	else()
+		target_sources(t_cose_test PRIVATE test/t_cose_make_openssl_test_key.c)
+		target_link_libraries(t_cose_test PRIVATE OpenSSL::Crypto)
+	endif()
+
+	add_test(NAME t_cose_test COMMAND t_cose_test)
 
 endif()

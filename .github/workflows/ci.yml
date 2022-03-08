@@ -1,0 +1,44 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+
+    # TODO strategies, for OpenSSL vs mbedtls
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Fetch QCBOR
+      uses: actions/checkout@v3
+      with:
+        repository: laurencelundblade/QCBOR
+
+    - name: Install QCBOR
+      run: |
+        cd QCBOR
+        make -j$(nproc)
+        sudo make install PREFIX=/usr/local
+
+    - name: Fetch mbedTLS
+      uses: actions/checkout@v3
+      with:
+        repository: ARMmbed/mbedtls
+        ref: v2.28.0
+
+    - name: Install mbedTLS
+      run: |
+        cd mbedtls
+        make -j $(nproc)
+        sudo make install DESTDIR=/usr/local
+
+    - name: Build t_cose
+      run: |
+        set -ex
+        mkdir build
+        cd build
+        cmake -DQCBOR_ROOT=/usr/local -DMBEDTLS=ON -DMbedTLS_ROOT=/usr/local ..
+        make -j $(nproc)
+    

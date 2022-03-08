@@ -36,12 +36,20 @@ The following cache variables may also be set:
 
 #]=======================================================================]
 
+include(CheckLibraryExists)
+
 find_path(QCBOR_INCLUDE_DIR
   NAMES qcbor/qcbor.h
 )
 find_library(QCBOR_LIBRARY
   NAMES qcbor
 )
+
+CHECK_LIBRARY_EXISTS(m sin "" HAVE_LIB_M)
+set(EXTRA_LIBS)
+if(HAVE_LIB_M)
+  set(EXTRA_LIBS m)
+endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(QCBOR
@@ -52,7 +60,7 @@ find_package_handle_standard_args(QCBOR
 )
 
 if(QCBOR_FOUND)
-  set(QCBOR_LIBRARIES "${QCBOR_LIBRARY}")
+  set(QCBOR_LIBRARIES "${QCBOR_LIBRARY} ${EXTRA_LIBS}")
   set(QCBOR_INCLUDE_DIRS "${QCBOR_INCLUDE_DIR}")
 endif()
 
@@ -62,6 +70,9 @@ if(QCBOR_FOUND AND NOT TARGET QCBOR::QCBOR)
     IMPORTED_LOCATION "${QCBOR_LIBRARY}"
     INTERFACE_INCLUDE_DIRECTORIES "${QCBOR_INCLUDE_DIR}"
   )
+  if (EXTRA_LIBS)
+    target_link_libraries(QCBOR::QCBOR INTERFACE ${EXTRA_LIBS})
+  endif()
 endif()
 
 mark_as_advanced(

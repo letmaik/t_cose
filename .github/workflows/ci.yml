@@ -41,6 +41,9 @@ jobs:
         cd build
         cmake -DQCBOR_ROOT=/usr/local -DMBEDTLS=ON -DMbedTLS_ROOT=/usr/local ..
         make -j $(nproc)
+
+    - name: Run example
+      run: build/t_cose_basic_example_psa
     
   openssl:
     runs-on: ubuntu-latest
@@ -67,4 +70,7 @@ jobs:
         cd build
         cmake -DQCBOR_ROOT=/usr/local -DMBEDTLS=OFF ..
         make -j $(nproc)
+    
+    - name: Run example
+      run: build/t_cose_basic_example_ossl
     

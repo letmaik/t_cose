@@ -4,12 +4,23 @@ project(t_cose
 	LANGUAGES C
 	VERSION 1.0.1)
 
+# Project options
 set(MBEDTLS OFF CACHE BOOL "Use mbedTLS instead of OpenSSL")
+set(BUILD_TESTS ON CACHE BOOL "Build tests")
+set(BUILD_EXAMPLES ON CACHE BOOL "Build examples")
 
-# Used in find_package() calls.
+# Built-in CMake options
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Create shared instead of static libraries")
+
+# Used in find_package() calls as preferred search paths
 set(QCBOR_ROOT "" CACHE PATH "Installation prefix of QCBOR")
 set(MbedTLS_ROOT "" CACHE PATH "Installation prefix of mbedTLS")
 set(OpenSSL_ROOT "" CACHE PATH "Installation prefix of OpenSSL")
+
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+	message(STATUS "No build type selected, defaulting to Release")
+	set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
+endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -50,3 +61,25 @@ install(TARGETS t_cose
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 install(DIRECTORY inc/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+if (BUILD_EXAMPLES)
+
+	if (MBEDTLS)
+		add_executable(t_cose_basic_example_psa examples/t_cose_basic_example_psa.c)
+		target_link_libraries(t_cose_basic_example_psa t_cose MbedTLS::MbedCrypto)
+	else()
+		add_executable(t_cose_basic_example_ossl examples/t_cose_basic_example_ossl.c)
+		target_link_libraries(t_cose_basic_example_ossl t_cose OpenSSL::Crypto)
+	endif()
+
+endif()
+
+if (BUILD_TESTS)
+
+	enable_testing()
+
+	# TODO
+
+	#add_test()
+
+endif()

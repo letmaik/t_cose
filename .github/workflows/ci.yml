@@ -25,7 +25,7 @@ jobs:
 
     runs-on: ${{ matrix.config.os-image }}
 
-    continue-on-error: ${{ matrix.config.allow-failure }}
+    continue-on-error: ${{ matrix.config.allow-failure || false }}
 
     steps:
     - uses: actions/checkout@v3

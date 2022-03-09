@@ -18,11 +18,14 @@ jobs:
         - os-image: ubuntu-latest
           crypto-provider: MbedTLS
           mbedtls-version: v3.1.0
+          allow-failure: true
 
         - os-image: ubuntu-latest
           crypto-provider: Test
 
     runs-on: ${{ matrix.config.os-image }}
+
+    continue-on-error: ${{ matrix.config.allow-failure }}
 
     steps:
     - uses: actions/checkout@v3

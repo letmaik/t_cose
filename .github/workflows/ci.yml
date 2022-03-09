@@ -36,7 +36,7 @@ jobs:
       run: |
         cd mbedtls
         make -j $(nproc)
-        sudo make install DESTDIR=/usr/local
+        sudo make install
 
     - name: Fetch QCBOR
       uses: actions/checkout@v3
@@ -48,14 +48,14 @@ jobs:
       run: |
         cd QCBOR
         make -j$(nproc)
-        sudo make install PREFIX=/usr/local
+        sudo make install
 
     - name: Build t_cose
       run: |
         set -ex
         mkdir build
         cd build
-        cmake -DCRYPTO_PROVIDER=${{ matrix.config.crypto-provider }} -DQCBOR_ROOT=/usr/local ..
+        cmake -DCRYPTO_PROVIDER=${{ matrix.config.crypto-provider }} ..
         make -j $(nproc)
 
     - name: Run OpenSSL example

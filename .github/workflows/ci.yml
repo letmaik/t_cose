@@ -3,54 +3,27 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  build_and_test:
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - os-image: ubuntu-latest
+          crypto-provider: OpenSSL
+        
+        - os-image: ubuntu-latest
+          crypto-provider: MbedTLS
+
+        - os-image: ubuntu-latest
+          crypto-provider: Test
+
+    runs-on: ${{ matrix.config.os-image }}
 
     steps:
     - uses: actions/checkout@v3
-
-    - name: Fetch QCBOR
-      uses: actions/checkout@v3
-      with:
-        repository: laurencelundblade/QCBOR
-        path: QCBOR
-
-    - name: Install QCBOR
-      run: |
-        cd QCBOR
-        make -j$(nproc)
-        sudo make install PREFIX=/usr/local
-
-    - name: Build t_cose
-      run: |
-        set -ex
-        mkdir build
-        cd build
-        cmake -DCRYPTO_PROVIDER=Test -DQCBOR_ROOT=/usr/local ..
-        make -j $(nproc)
-
-    - name: Run tests
-      run: build/t_cose_test
-
-  mbedtls:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Fetch QCBOR
-      uses: actions/checkout@v3
-      with:
-        repository: laurencelundblade/QCBOR
-        path: QCBOR
-
-    - name: Install QCBOR
-      run: |
-        cd QCBOR
-        make -j$(nproc)
-        sudo make install PREFIX=/usr/local
 
     - name: Fetch mbedTLS
+      if: matrix.config.crypto-provider == 'MbedTLS'
       uses: actions/checkout@v3
       with:
         repository: ARMmbed/mbedtls
@@ -58,30 +31,11 @@ jobs:
         path: mbedtls
 
     - name: Install mbedTLS
+      if: matrix.config.crypto-provider == 'MbedTLS'
       run: |
         cd mbedtls
         make -j $(nproc)
         sudo make install DESTDIR=/usr/local
-
-    - name: Build t_cose
-      run: |
-        set -ex
-        mkdir build
-        cd build
-        cmake -DCRYPTO_PROVIDER=MbedTLS -DQCBOR_ROOT=/usr/local -DMbedTLS_ROOT=/usr/local ..
-        make -j $(nproc)
-
-    - name: Run example
-      run: build/t_cose_basic_example_psa
-
-    - name: Run tests
-      run: build/t_cose_test
-    
-  openssl:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
 
     - name: Fetch QCBOR
       uses: actions/checkout@v3
@@ -100,12 +54,16 @@ jobs:
         set -ex
         mkdir build
         cd build
-        cmake -DCRYPTO_PROVIDER=OpenSSL -DQCBOR_ROOT=/usr/local ..
+        cmake -DCRYPTO_PROVIDER=${{ matrix.config.crypto-provider }} -DQCBOR_ROOT=/usr/local ..
         make -j $(nproc)
-    
-    - name: Run example
+
+    - name: Run OpenSSL example
+      if: matrix.config.crypto-provider == 'OpenSSL'
       run: build/t_cose_basic_example_ossl
-    
+
+    - name: Run MbedTLS example
+      if: matrix.config.crypto-provider == 'MbedTLS'
+      run: build/t_cose_basic_example_psa
+
     - name: Run tests
       run: build/t_cose_test
-    

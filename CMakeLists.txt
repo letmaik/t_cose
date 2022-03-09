@@ -121,7 +121,7 @@ if (BUILD_TESTS)
         set(TEST_SRC_EXTRA)
         set(TEST_EXTRA_DEFS -DT_COSE_ENABLE_HASH_FAIL_TEST -DT_COSE_DISABLE_SIGN_VERIFY_TESTS)
     else()
-        message(FATAL_ERROR "bug!")
+        message(FATAL_ERROR "Bug!")
     endif()
 
     add_executable(t_cose_test ${TEST_SRC_COMMON} ${TEST_SRC_EXTRA})

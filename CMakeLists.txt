@@ -47,11 +47,12 @@ elseif(CRYPTO_PROVIDER STREQUAL "OpenSSL")
 
 elseif(CRYPTO_PROVIDER STREQUAL "Test")
 
-    set(CRYPTO_LIBRARY)
-    set(CRYPTO_COMPILE_DEFS -DT_COSE_USE_B_CON_SHA256)
-    set(CRYPTO_ADAPTER_SRC
-        crypto_adapters/t_cose_test_crypto.c
-        crypto_adapters/b_con_hash/sha256.c)
+    add_library(b_con_hash crypto_adapters/b_con_hash/sha256.c)
+    target_include_directories(b_con_hash PUBLIC crypto_adapters/b_con_hash)
+
+    set(CRYPTO_LIBRARY b_con_hash)
+    set(CRYPTO_COMPILE_DEFS -DT_COSE_USE_B_CON_SHA256 -DT_COSE_ENABLE_HASH_FAIL_TEST)
+    set(CRYPTO_ADAPTER_SRC crypto_adapters/t_cose_test_crypto.c)
 
 else()
     message(FATAL_ERROR "Bug!")
@@ -103,9 +104,12 @@ if (BUILD_TESTS)
         main.c
         test/run_tests.c
         test/t_cose_make_test_messages.c
-        test/t_cose_sign_verify_test.c
         test/t_cose_test.c
     )
+
+    if (NOT CRYPTO_PROVIDER STREQUAL "Test")
+        list(APPEND TEST_SRC_COMMON test/t_cose_sign_verify_test.c)
+    endif()
 
     if (CRYPTO_PROVIDER STREQUAL "MbedTLS")
         set(TEST_SRC_EXTRA test/t_cose_make_psa_test_key.c)

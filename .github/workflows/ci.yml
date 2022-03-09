@@ -3,6 +3,35 @@ name: CI
 on: [push, pull_request]
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Fetch QCBOR
+      uses: actions/checkout@v3
+      with:
+        repository: laurencelundblade/QCBOR
+        path: QCBOR
+
+    - name: Install QCBOR
+      run: |
+        cd QCBOR
+        make -j$(nproc)
+        sudo make install PREFIX=/usr/local
+
+    - name: Build t_cose
+      run: |
+        set -ex
+        mkdir build
+        cd build
+        cmake -DCRYPTO_PROVIDER=Test -DQCBOR_ROOT=/usr/local ..
+        make -j $(nproc)
+
+    - name: Run tests
+      run: build/t_cose_test
+
   mbedtls:
     runs-on: ubuntu-latest
 
@@ -39,7 +68,7 @@ jobs:
         set -ex
         mkdir build
         cd build
-        cmake -DQCBOR_ROOT=/usr/local -DMBEDTLS=ON -DMbedTLS_ROOT=/usr/local ..
+        cmake -DCRYPTO_PROVIDER=MbedTLS -DQCBOR_ROOT=/usr/local -DMbedTLS_ROOT=/usr/local ..
         make -j $(nproc)
 
     - name: Run example
@@ -71,7 +100,7 @@ jobs:
         set -ex
         mkdir build
         cd build
-        cmake -DQCBOR_ROOT=/usr/local -DMBEDTLS=OFF ..
+        cmake -DCRYPTO_PROVIDER=OpenSSL -DQCBOR_ROOT=/usr/local ..
         make -j $(nproc)
     
     - name: Run example

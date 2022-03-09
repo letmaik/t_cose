@@ -43,14 +43,16 @@ if(MBEDTLS)
     find_package(MbedTLS REQUIRED)
     target_link_libraries(t_cose PRIVATE MbedTLS::MbedCrypto)
     target_sources(t_cose PRIVATE crypto_adapters/t_cose_psa_crypto.c)
-    target_compile_definitions(t_cose PRIVATE -DT_COSE_USE_PSA_CRYPTO=1)
+    set(CRYPTO_COMPILE_DEFS -DT_COSE_USE_PSA_CRYPTO=1)
+    target_compile_definitions(t_cose PRIVATE ${CRYPTO_COMPILE_DEFS})
 
 else()
 
     find_package(OpenSSL REQUIRED)
     target_link_libraries(t_cose PRIVATE OpenSSL::Crypto)
     target_sources(t_cose PRIVATE crypto_adapters/t_cose_openssl_crypto.c)
-    target_compile_definitions(t_cose PRIVATE -DT_COSE_USE_OPENSSL_CRYPTO=1)
+    set(CRYPTO_COMPILE_DEFS -DT_COSE_USE_OPENSSL_CRYPTO=1)
+    target_compile_definitions(t_cose PRIVATE ${CRYPTO_COMPILE_DEFS})
 
 endif()
 
@@ -89,6 +91,9 @@ if (BUILD_TESTS)
     add_executable(t_cose_test ${T_COSE_TEST_SRC_COMMON})
     target_include_directories(t_cose_test PRIVATE src test)
     target_link_libraries(t_cose_test PRIVATE t_cose)
+    
+    # Needed because the tests include headers from src/
+    target_compile_definitions(t_cose_test PRIVATE ${CRYPTO_COMPILE_DEFS})
 
     if (MBEDTLS)
         target_sources(t_cose_test PRIVATE test/t_cose_make_psa_test_key.c)

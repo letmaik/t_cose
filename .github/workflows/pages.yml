@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "master"
+      - "letmaik/pages"
   workflow_dispatch:
 
 jobs:

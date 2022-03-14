@@ -15,7 +15,6 @@ jobs:
 
     permissions:
       pages: write
-      deployments: write
       id-token: write
 
     environment:
@@ -34,7 +33,7 @@ jobs:
     # Note: The following two steps are temporary and won't be
     # necessary once actions/deploy-pages is out of beta.
     - name: Archive website
-      run: tar --dereference --hard-dereference --directory html/ -cvf artifact.tar .
+      run: tar --directory html/ -cvf artifact.tar .
       
     - name: Upload artifact
       uses: actions/upload-artifact@v3
@@ -44,4 +43,4 @@ jobs:
     
     - name: Deploy to GitHub Pages
       id: deployment
-      uses: actions/deploy-pages@v1-beta
+      uses: actions/deploy-pages@v1.0.1

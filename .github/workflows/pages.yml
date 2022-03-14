@@ -1,0 +1,33 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Doxygen
+      run: sudo apt-get install doxygen
+
+    - name: Run Doxygen
+      run: ( cat doxygen/t_cose_doxyfile ; echo "OUTPUT_DIRECTORY=" ; echo "INPUT=inc/t_cose" ) | doxygen -
+
+    # Note: The following two steps are temporary and won't be
+    # necessary once actions/deploy-pages is out of beta.
+    - name: Archive website
+      run: tar --dereference --hard-dereference --directory html/ -cvf artifact.tar .
+      
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: github-pages
+        path: ./artifact.tar
+    
+    - name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v1-beta
